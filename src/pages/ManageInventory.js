@@ -68,6 +68,11 @@ const ManageInventory = () => {
         }
     }
 
+    const logoutClicked = () => {
+        localStorage.removeItem("token");
+        navigate("/");
+    }
+
     const loadCategories = async () => {
         setSelection("category");
         document.getElementById("categoryButton").classList.add("active");
@@ -600,7 +605,7 @@ const ManageInventory = () => {
                             </li>
                             <hr />
                             <li className="nav-item d-sm-none">
-                                <span className="nav-link text-danger pt-0" style={{ cursor: "pointer" }}>Logout</span>
+                                <span className="nav-link text-danger pt-0" style={{ cursor: "pointer" }} onClick={logoutClicked} >Logout</span>
                             </li>
                             <div className="vr d-none d-sm-block"></div>
                             <li className="nav-item">
@@ -613,7 +618,7 @@ const ManageInventory = () => {
                                 <ul className="dropdown-menu dropdown-menu-end">
                                     <li><Link className="dropdown-item" to="/employee-profile">Profile</Link></li>
                                     <li><hr className="dropdown-divider" /></li>
-                                    <li><span className="dropdown-item text-danger" style={{ cursor: "pointer" }}>Logout</span></li>
+                                    <li><span className="dropdown-item text-danger" style={{ cursor: "pointer" }} onClick={logoutClicked}>Logout</span></li>
                                 </ul>
                             </li>
                         </ul>

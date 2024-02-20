@@ -1,7 +1,7 @@
 import { Link, resolvePath, useNavigate } from 'react-router-dom';
 import logo from '../../logo.svg';
 import axios from 'axios';
-import { useLayoutEffect } from 'react';
+import { useEffect, useLayoutEffect } from 'react';
 
 const Login = () => {
     const navigate = useNavigate();
@@ -9,6 +9,18 @@ const Login = () => {
     useLayoutEffect(() => {
         document.body.style.backgroundColor = "lightgreen"
     });
+
+    useEffect(() => {
+        checkToken();
+    }, []);
+
+    const checkToken = () => {
+        const token = localStorage.getItem("token");
+        if(token !== null) {
+            axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+            getUserFromToken();
+        }
+    }
 
     const loginButtonClick = async (event) => {
         event.preventDefault();
