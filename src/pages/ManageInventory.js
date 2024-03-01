@@ -111,12 +111,14 @@ const ManageInventory = () => {
         let html = "";
         for (let i = 0; i < items.length; i++) {
             const response = await axios.get(`http://localhost:8080/category/${items[i].category}`);
+            console.log(items[i]);
             html +=
                 `<tr>` +
                 `<td>${items[i].id}</td>` +
                 `<td>${items[i].name}</td>` +
                 `<td>${items[i].category}</td>` +
                 `<td>${response.data.name}</td>` +
+                `<td>${items[i].price}</td>` +
                 `</tr>`
         }
         document.getElementById("tableBody").innerHTML = html;
@@ -144,7 +146,6 @@ const ManageInventory = () => {
                 `<td>${stocks[i].itemId}</td>` +
                 `<td>${response.data.name}</td>` +
                 `<td>${stocks[i].batch}</td>` +
-                `<td>${stocks[i].price}</td>` +
                 `<td>${stocks[i].quantity}</td>` +
                 `</tr>`
         }
@@ -219,7 +220,11 @@ const ManageInventory = () => {
                     `</div>` +
                     `<div class="form-floating col-md row-sm">` +
                     `<select class="form-select mb-3" id="category">${categoryOptions}</select>` +
-                    `<label class="form-label">Title</label>` +
+                    `<label class="form-label">Category</label>` +
+                    `</div>` +
+                    `<div class="form-floating mb-3">` +
+                    `<input type="number" class="form-control" id="price" placeholder="" required />` +
+                    `<label class="form-label">Price</label>` +
                     `</div>` +
                     `</form>` +
                     `</div>`;
@@ -251,10 +256,6 @@ const ManageInventory = () => {
                     `<div class="form-floating mb-3">` +
                     `<input type="text" class="form-control" id="batch" placeholder="" required />` +
                     `<label class="form-label">Batch</label>` +
-                    `</div>` +
-                    `<div class="form-floating mb-3">` +
-                    `<input type="text" class="form-control" id="price" placeholder="" required />` +
-                    `<label class="form-label">Price</label>` +
                     `</div>` +
                     `<div class="form-floating mb-3">` +
                     `<input type="text" class="form-control" id="quantity" placeholder="" required />` +
@@ -300,11 +301,13 @@ const ManageInventory = () => {
         const id = document.getElementById("id").value;
         const name = document.getElementById("name").value;
         const category = document.getElementById("category").value;
+        const price = document.getElementById("price").value;
 
         const data = {
             "id": id,
             "name": name,
-            "category": category
+            "category": category,
+            "price": price
         }
         const response = await axios.post(`http://localhost:8080/item`, data);
         if (response && response.status === 201) {
@@ -320,14 +323,12 @@ const ManageInventory = () => {
         const id = document.getElementById("id").value;
         const itemId = document.getElementById("itemId").value;
         const batch = document.getElementById("batch").value;
-        const price = document.getElementById("price").value;
         const quantity = document.getElementById("quantity").value;
 
         const data = {
             "id": id,
             "itemId": itemId,
             "batch": batch,
-            "price": price,
             "quantity": quantity
         }
         const response = await axios.post(`http://localhost:8080/stock`, data);
@@ -396,7 +397,11 @@ const ManageInventory = () => {
                     `</div>` +
                     `<div class="form-floating col-md row-sm">` +
                     `<select class="form-select mb-3" id="category">${categoryOptions}</select>` +
-                    `<label class="form-label">Title</label>` +
+                    `<label class="form-label">Category</label>` +
+                    `</div>` +
+                    `<div class="form-floating mb-3">` +
+                    `<input type="number" class="form-control" id="price" placeholder="" value=${row[0].childNodes[4].innerHTML} required />` +
+                    `<label class="form-label">Price</label>` +
                     `</div>` +
                     `</form>` +
                     `</div>`;
@@ -429,10 +434,6 @@ const ManageInventory = () => {
                     `<div class="form-floating mb-3">` +
                     `<input type="text" class="form-control" id="batch" placeholder="" value=${row[0].childNodes[3].innerHTML} required />` +
                     `<label class="form-label">Batch</label>` +
-                    `</div>` +
-                    `<div class="form-floating mb-3">` +
-                    `<input type="text" class="form-control" id="price" placeholder="" value=${row[0].childNodes[4].innerHTML} required />` +
-                    `<label class="form-label">Price</label>` +
                     `</div>` +
                     `<div class="form-floating mb-3">` +
                     `<input type="text" class="form-control" id="quantity" placeholder="" value=${row[0].childNodes[5].innerHTML} required />` +
@@ -473,11 +474,13 @@ const ManageInventory = () => {
         const id = document.getElementById("id").value;
         const name = document.getElementById("name").value;
         const category = document.getElementById("category").value;
+        const price = document.getElementById("price").value;
 
         const data = {
             "id": id,
             "name": name,
-            "category": category
+            "category": category,
+            "price": price
         }
         const response = await axios.put(`http://localhost:8080/item/${id}`, data);
         if (response && response.status === 200) {
@@ -493,14 +496,12 @@ const ManageInventory = () => {
         const id = document.getElementById("id").value;
         const itemId = document.getElementById("itemId").value;
         const batch = document.getElementById("batch").value;
-        const price = document.getElementById("price").value;
         const quantity = document.getElementById("quantity").value;
 
         const data = {
             "id": id,
             "itemId": itemId,
             "batch": batch,
-            "price": price,
             "quantity": quantity
         }
         const response = await axios.put(`http://localhost:8080/stock/${id}`, data);
@@ -659,6 +660,7 @@ const ManageInventory = () => {
                                         <th>Name</th>
                                         <th>Category ID</th>
                                         <th>Category Name</th>
+                                        <th>Price</th>
                                     </tr>
                                 </thead>
                                 <tbody id="tableBody"></tbody>
@@ -672,7 +674,6 @@ const ManageInventory = () => {
                                         <th>Item ID</th>
                                         <th>Item Name</th>
                                         <th>Batch</th>
-                                        <th>Price</th>
                                         <th>Quantity</th>
                                     </tr>
                                 </thead>

@@ -16,9 +16,11 @@ const Login = () => {
 
     const checkToken = () => {
         const token = localStorage.getItem("token");
-        if(token !== null) {
+        if (token !== null) {
             axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
             getUserFromToken();
+        } else {
+            localStorage.removeItem("cart");
         }
     }
 
@@ -38,7 +40,7 @@ const Login = () => {
         const response = await axios
             .post("http://localhost:8080/auth/login", data)
             .catch(error => { console.log(error) });
-            console.log(response);
+        console.log(response);
 
         if (response && response.status === 200) {
             localStorage.setItem("token", response.data);
@@ -59,15 +61,19 @@ const Login = () => {
 
     const getUserFromToken = async () => {
         try {
-            const response = await axios.get(`http://localhost:8080/customer/token`);
-            if(response.data === "") {
+            const response = await axios.get(`http://localhost:8080/customer/token`).catch((error) => {
+                console.log(error);
+                localStorage.removeItem("token");
+                return;
+            });
+            if (response.data === "") {
                 navigate("/manage-inventory");
             } else {
                 navigate("/home")
-            }   
+            }
         } catch (error) {
             console.error(error);
-        } 
+        }
     }
 
     return (
@@ -83,13 +89,13 @@ const Login = () => {
                     <div className="collapse navbar-collapse" id="navbarSupportedContent">
                         <ul className="navbar-nav ms-auto mb-2 mb-lg-0">
                             <li className="nav-item">
-                                <Link className="nav-link active" to="/home">Browse</Link>
+                                <Link className="nav-link" to="/home">Browse</Link>
                             </li>
                             <li className="nav-item">
-                                <Link className="nav-link" to="/aboutus">About Us</Link>
+                                <Link className="nav-link" to="/about-us">About Us</Link>
                             </li>
                             <li className="nav-item">
-                                <Link className="nav-link" to="/contactus">Contact Us</Link>
+                                <Link className="nav-link" to="/contact-us">Contact Us</Link>
                             </li>
                         </ul>
                     </div>
@@ -100,6 +106,7 @@ const Login = () => {
                 <div className="m-5 p-5 flex-fill order-last order-md-first" >
                     <h1>SuperStore</h1>
                     <h2>Best Store for all your needs</h2>
+                    <button className="btn btn-success" onClick={function () {navigate("/home")}}>Browse Store</button>
                 </div>
 
                 <div className="login-box bg-light m-5 p-5 flex-fill order-first order-md-last rounded align-items-center">

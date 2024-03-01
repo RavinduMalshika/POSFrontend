@@ -125,10 +125,10 @@ const Register = () => {
         } else if (confirmPassword !== password) {
             setErrorMsg("Password confimation failed");
             return (false);
-        } else if (phone1 != null && !tel_regex.test(phone1)) {
+        } else if (phone1 != "" && !tel_regex.test(phone1)) {
             setErrorMsg("Please check the phone 1 number entered");
             return (false);
-        } else if (phone2 != null && !tel_regex.test(phone2)) {
+        } else if (phone2 != "" && !tel_regex.test(phone2)) {
             setErrorMsg("Please check the phone 2 number entered");
             return (false);
         } else {
