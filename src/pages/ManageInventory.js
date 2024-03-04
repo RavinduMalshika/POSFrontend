@@ -629,18 +629,19 @@ const ManageInventory = () => {
 
             <div className="container-fluid">
                 <div className="row">
-                    <div className="col-3">
-                        <div className="row m-2">
+                    <div className="col-md-3 col-12">
+                        <div className="row m-2 mx-sm-5">
                             <button className="btn btn-primary" id="stockButton" onClick={loadStocks}>Stock</button>
                         </div>
-                        <div className="row m-2">
+                        <div className="row m-2 mx-sm-5">
                             <button className="btn btn-primary" id="itemButton" onClick={loadItems}>Items</button>
                         </div>
-                        <div className="row m-2">
+                        <div className="row m-2 mx-sm-5">
                             <button className="btn btn-primary" id="categoryButton" onClick={loadCategories}>Categories</button>
                         </div>
                     </div>
                     <div className="col m-2">
+                        <div className="table-responsive">
                         {selection === "category" &&
                             <table className="table table-hover table-bordered">
                                 <thead>
@@ -680,6 +681,7 @@ const ManageInventory = () => {
                                 <tbody id="tableBody"></tbody>
                             </table>
                         }
+                        </div>
                         {selection !== null &&
                             <div className="row justify-content-end">
                                 <button className="col-3 m-2 btn btn-success" id="createButton" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasForm" aria-controls="offcanvasForm" onClick={createButtonClicked} >Create</button>

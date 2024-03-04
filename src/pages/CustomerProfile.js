@@ -301,7 +301,7 @@ const CustomerProfile = () => {
 
     return (
         <div>
-            <nav className="flex-row navbar navbar-expand-sm bg-body-tertiary" id="topNavBar">
+            <nav className="flex-row navbar navbar-expand-sm bg-body-tertiary w100" id="topNavBar">
                 <div className="container-fluid">
                     <div className="navbar-header mx-auto">
                         <img className="navbar-brand m-0 p-0 pe-3" src={logo} height={40} alt="SuperStore" />
@@ -377,7 +377,7 @@ const CustomerProfile = () => {
             </nav>
 
             {user !== null &&
-                <div className="row justify-content-center">
+                <div className="row justify-content-center m-auto">
                     <div className="border border-white rounded m-3 p-3 col-lg-8 col-md-10 col-11">
                         <div className="d-flex mb-3">
                             <h1 className="col">Personal Information</h1>
@@ -460,7 +460,7 @@ const CustomerProfile = () => {
                 </div>
             }
 
-            <div className="row justify-content-center">
+            <div className="row justify-content-center m-auto">
                 <div className="border border-white rounded m-3 p-3 col-lg-8 col-md-10 col-11">
                     <h1 className="mb-3">Change Password</h1>
                     <div className="row justify-content-center">

@@ -104,7 +104,7 @@ const Login = () => {
 
             <div className="d-flex flex-column flex-md-row">
                 <div className="m-5 p-5 flex-fill order-last order-md-first" >
-                    <h1>SuperStore</h1>
+                    <h1>Super Store</h1>
                     <h2>Best Store for all your needs</h2>
                     <button className="btn btn-success" onClick={function () {navigate("/home")}}>Browse Store</button>
                 </div>

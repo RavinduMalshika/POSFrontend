@@ -12,6 +12,8 @@ const Home = () => {
     const [page, setPage] = useState(0);
     const [totalPages, setTotalPages] = useState(0);
     const [cart, setCart] = useState([]);
+    const [itemsPerPage, setItemsPerPage] = useState(1);
+    const [selectedCategory, setSelectedCategory] = useState(0);
     const navigate = useNavigate();
 
     const isFirstRenderUser = useRef(true);
@@ -19,6 +21,7 @@ const Home = () => {
     const isFirstRenderItem = useRef(true);
     const isFirstRenderItemList = useRef(true);
     const isFirstRenderCart = useRef(true);
+    const isFirstRenderItemsPerPage = useRef(true);
 
     useLayoutEffect(() => {
         document.body.style.backgroundColor = "lavender";
@@ -44,12 +47,20 @@ const Home = () => {
                     document.getElementById("content").style.height = height + "px";
                 }
             }
+
+            if (document.body.offsetWidth >= 1920 && itemsPerPage !== 15) {
+                setItemsPerPage(15);
+            } else if (document.body.offsetWidth >= 992 && itemsPerPage !== 9) {
+                setItemsPerPage(9);
+            } else if (document.body.offsetWidth >= 768 && itemsPerPage !== 6) {
+                setItemsPerPage(6);
+            } else {
+                setItemsPerPage(6);
+            }
         }, true);
 
         let height = document.body.offsetHeight - document.getElementById("topNavBar").offsetHeight;
         document.getElementById("content").style.height = height + "px";
-
-        categorySelected("All Categories");
     }, [])
 
     useEffect(() => {
@@ -67,7 +78,13 @@ const Home = () => {
             isFirstRenderCategory.current = false;
             return;
         }
-        loadCategoryList();
+        if (document.body.offsetWidth >= 992 && itemsPerPage !== 9) {
+            setItemsPerPage(15);
+        } else if (document.body.offsetWidth >= 768 && itemsPerPage !== 6) {
+            setItemsPerPage(6);
+        } else {
+            setItemsPerPage(6);
+        }
     }, [categoryList]);
 
     useEffect(() => {
@@ -94,6 +111,15 @@ const Home = () => {
         updateCart();
     }, [cart]);
 
+    useEffect(() => {
+        if (isFirstRenderItemsPerPage.current === true) {
+            isFirstRenderItemsPerPage.current = false;
+            return;
+        }
+        loadCategoryList();
+        let selectedCategoryEntry = document.getElementById("categoryList").childNodes[selectedCategory];
+        selectedCategoryEntry.click();
+    }, [itemsPerPage]);
 
     const getUserFromToken = async () => {
         const response = await axios.get(`http://localhost:8080/customer/token`).catch((error) => {
@@ -138,21 +164,23 @@ const Home = () => {
                     }
                 }
                 categorySelected(categories[i].innerHTML);
+                setSelectedCategory(i);
             });
         }
-
     }
 
     const categorySelected = async (filter) => {
         if (filter === "All Categories") {
             const response = await axios.get(`http://localhost:8080/auth/item`);
+            console.log(response.data.length);
             setItems(response.data);
 
-            let pages = parseInt(response.data.length / 6);
-            if (response.data.length % 6 > 0) {
+            let pages = parseInt(response.data.length / itemsPerPage);
+            if (response.data.length % itemsPerPage > 0) {
                 pages += 1;
             }
             setTotalPages(pages);
+            console.log(pages);
         }
         else {
             let category = null;
@@ -164,11 +192,12 @@ const Home = () => {
             const response = await axios.get(`http://localhost:8080/auth/item/category/${category}`);
             setItems(response.data);
 
-            let pages = parseInt(response.data.length / 6);
-            if (response.data.length % 6 > 0) {
+            let pages = parseInt(response.data.length / itemsPerPage);
+            if (response.data.length % itemsPerPage > 0) {
                 pages += 1;
             }
             setTotalPages(pages);
+            console.log(pages);
         }
         setPage(0);
     }
@@ -176,84 +205,93 @@ const Home = () => {
     const loadItems = async () => {
         let html = "";
 
+        console.log("total :" + totalPages);
+        console.log("page: " + page);
+        console.log(page === (totalPages - 1));
+
         if (items.length === 0) {
             console.log("no items in the category");
             html += `<p class="text-center mt-2">No items available in the selected category</p>`
-        }
-        else if (page === totalPages - 1) {
-            for (let i = page * 6; i < items.length; i++) {
-                const response = await axios.get(`http://localhost:8080/auth/stock/item/${items[i].id}`);
-                let stock = 0;
-                for (let j = 0; j < response.data.length; j++) {
-                    stock += response.data[j].quantity;
-                }
+        } else if (page === (totalPages - 1)) {
+            console.log("items less than capacity");
+            for (let i = page * itemsPerPage; i < items.length; i++) {
+                if (items[i] !== null) {
+                    console.log(items[i]);
+                    const response = await axios.get(`http://localhost:8080/auth/stock/item/${items[i].id}`);
+                    let stock = 0;
+                    for (let j = 0; j < response.data.length; j++) {
+                        stock += response.data[j].quantity;
+                    }
 
-                let stockDisplay = "";
-                if (stock > 0) {
-                    stockDisplay = "Available: " + stock;
-                } else {
-                    stockDisplay = "Out of Stock";
-                }
+                    let stockDisplay = "";
+                    if (stock > 0) {
+                        stockDisplay = "Available: " + stock;
+                    } else {
+                        stockDisplay = "Out of Stock";
+                    }
 
-                html +=
-                    `<div class="col-3 card m-3">` +
-                    `<div class="card-body p-2">` +
-                    `<h5 class="card-title">${items[i].name}</h5>` +
-                    `<p class="card-text">Rs. ${items[i].price}</p>` +
-                    `<p class="card-text">${stockDisplay}</p>`;
-                if (stock === 0) {
                     html +=
+                        `<div class="col-lg-2 col-sm-3 col-10 card m-3">` +
+                        `<div class="card-body p-2">` +
+                        `<h5 class="card-title">${items[i].name}</h5>` +
+                        `<p class="card-text">Rs. ${items[i].price}</p>` +
+                        `<p class="card-text">${stockDisplay}</p>`;
+                    if (stock === 0) {
+                        html +=
 
-                        `</div>` +
-                        `</div>`;
-                } else {
-                    html +=
-                        `<div class="btn-group btn-group-sm" role="group">` +
-                        `<button type="button" class="btn btn-secondary decrement-button">-</button>` +
-                        `<button type="button" class="btn btn-secondary increment-button" value=${stock}>+</button>` +
-                        `<button type="button" class="btn btn-success add-to-cart" value=${items[i].id}>Add 1</button>` +
-                        `</div>` +
-                        `</div>` +
-                        `</div>`;
+                            `</div>` +
+                            `</div>`;
+                    } else {
+                        html +=
+                            `<div class="btn-group btn-group-sm" role="group">` +
+                            `<button type="button" class="btn btn-secondary decrement-button">-</button>` +
+                            `<button type="button" class="btn btn-secondary increment-button" value=${stock}>+</button>` +
+                            `<button type="button" class="btn btn-success add-to-cart" value=${items[i].id}>Add 1</button>` +
+                            `</div>` +
+                            `</div>` +
+                            `</div>`;
+                    }
                 }
-
-
             }
         } else {
-            for (let i = page * 6; i < (page * 6 + 6); i++) {
-                const response = await axios.get(`http://localhost:8080/auth/stock/item/${items[i].id}`);
-                let stock = 0;
-                for (let j = 0; j < response.data.length; j++) {
-                    stock += response.data[j].quantity;
-                }
+            console.log("items more than capacity");
+            for (let i = page * itemsPerPage; i < (page * itemsPerPage + itemsPerPage); i++) {
+                if (items[i] !== null) {
+                    console.log(items[i]);
+                    const response = await axios.get(`http://localhost:8080/auth/stock/item/${items[i].id}`);
+                    let stock = 0;
+                    for (let j = 0; j < response.data.length; j++) {
+                        stock += response.data[j].quantity;
+                    }
 
-                let stockDisplay = "";
-                if (stock > 0) {
-                    stockDisplay = "Available: " + stock;
-                } else {
-                    stockDisplay = "Out of Stock";
-                }
+                    let stockDisplay = "";
+                    if (stock > 0) {
+                        stockDisplay = "Available: " + stock;
+                    } else {
+                        stockDisplay = "Out of Stock";
+                    }
 
-                html +=
-                    `<div class="col-3 card m-1">` +
-                    `<div class="card-body p-1">` +
-                    `<h5 class="card-title">${items[i].name}</h5>` +
-                    `<p class="card-text">Rs. ${items[i].price}</p>` +
-                    `<p class="card-text">Available: ${stockDisplay}</p>`;
-
-                if (stock === 0) {
                     html +=
-                        `</div>` +
-                        `</div>`;
-                } else {
-                    html +=
-                        `<div class="btn-group btn-group-sm" role="group">` +
-                        `<button type="button" class="btn btn-secondary decrement-button">-</button>` +
-                        `<button type="button" class="btn btn-secondary increment-button" value=${stock}>+</button>` +
-                        `<button type="button" class="btn btn-success add-to-cart" value=${items[i].id}>Add 1</button>` +
-                        `</div>` +
-                        `</div>` +
-                        `</div>`;
+                        `<div class="col-lg-2 col-sm-3 col-10 card m-1">` +
+                        `<div class="card-body p-1">` +
+                        `<h5 class="card-title">${items[i].name}</h5>` +
+                        `<p class="card-text">Rs. ${items[i].price}</p>` +
+                        `<p class="card-text">Available: ${stockDisplay}</p>`;
+
+                    if (stock === 0) {
+                        html +=
+                            `</div>` +
+                            `</div>`;
+                    } else {
+                        html +=
+                            `<div class="btn-group btn-group-sm" role="group">` +
+                            `<button type="button" class="btn btn-secondary decrement-button">-</button>` +
+                            `<button type="button" class="btn btn-secondary increment-button" value=${stock}>+</button>` +
+                            `<button type="button" class="btn btn-success add-to-cart" value=${items[i].id}>Add 1</button>` +
+                            `</div>` +
+                            `</div>` +
+                            `</div>`;
+                    }
                 }
             }
         }
@@ -423,12 +461,39 @@ const Home = () => {
                 if (response && response.status === 201) {
                     console.log("order detail created");
                     setCart([]);
+                    //document.getElementById("toastBody").classList.innerHTML = `<span>Order (${orderId.data}) placed.</span>`;
+                    //document.getElementById("liveToast").classList.add("show");
                 } else {
                     console.log("order detail creation failed");
                 }
             }
         } else {
             console.log("order creation failed");
+        }
+    }
+
+    const loadOffcanvasCategoryList = async () => {
+        let html = `<li class="list-group-item list-group-item-action list-group-item-success ps-3">All Categories</li>`;
+        categoryList.forEach(category => {
+            html += `<li class="list-group-item list-group-item-action list-group-item-success ps-3">${category.name}</li>`;
+        });
+
+        console.log(document.getElementById("offcanvasCategoryListBody"));
+        document.getElementById("offcanvasCategoryListBody").innerHTML = html;
+
+        let categories = document.getElementById("offcanvasCategoryListBody").childNodes;
+
+        for (let i = 0; i < categories.length; i++) {
+            categories[i].addEventListener("click", function () {
+                categories[i].classList.add("active");
+                for (let j = 0; j < categories.length; j++) {
+                    if (i !== j) {
+                        categories[j].classList.remove("active");
+                    }
+                }
+                document.getElementById("offcanvasCategoryListClose").click();
+                categorySelected(categories[i].innerHTML);
+            });
         }
     }
 
@@ -511,22 +576,19 @@ const Home = () => {
 
             <div className="container-fluid p-0 m-0" id="content">
                 <div className="row w-100 h-100">
-                    <div className="col-3 bg-light h-100 pt-3 px-2">
+                    <div className="d-none d-md-block col-3 bg-light h-100 pt-3 px-2">
                         <ul className="list-group" id="categoryList"></ul>
                     </div>
-                    <div className='col-9 p-4'>
+                    <div className='col p-4'>
+                        <p class="d-md-none bi bi-funnel fw-6 m-1" style={{ cursor: "pointer" }} type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasCategoryList" aria-controls="offcanvasCategoryList" onClick={loadOffcanvasCategoryList}> Filter by Category</p>
                         <div className="row border border-white rounded justify-content-evenly m-0" id="itemList">
-
                         </div>
                         <div className="row m-2">
                             <nav>
                                 <ul class="pagination justify-content-center" id="pageNav">
-
                                 </ul>
                             </nav>
                         </div>
-
-
                     </div>
                 </div>
             </div>
@@ -539,6 +601,28 @@ const Home = () => {
                 <div class="offcanvas-body pt-0" id="cartBody">
                 </div>
             </div>
+
+            <div class="offcanvas offcanvas-start w-50" tabindex="-1" id="offcanvasCategoryList" aria-labelledby="offcanvasCategoryList">
+                <div class="offcanvas-header">
+                    <h5 class="offcanvas-title">Filter by Category</h5>
+                    <button type="button" id="offcanvasCategoryListClose" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+                </div>
+                <div class="offcanvas-body">
+                    <ul className="list-group" id="offcanvasCategoryListBody"></ul>
+                </div>
+            </div>
+
+            {/* <div className="toast-container position-fixed bottom-0 end-0 p-3">
+                <div id="liveToast" className="toast" role="alert" aria-live="assertive" aria-atomic="true">
+                    <div className="toast-header">
+                        <img src={logo} className="rounded me-2" alt="Super Store" height={25}/>
+                            <strong className="me-auto">Bootstrap</strong>
+                            <button type="button" className="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+                    </div>
+                    <div className="toast-body" id="toastBody">
+                    </div>
+                </div>
+            </div> */}
         </div>
     )
 }

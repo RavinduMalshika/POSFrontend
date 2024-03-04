@@ -11,6 +11,7 @@ const ManageEmployees = () => {
     const navigate = useNavigate();
 
     const isFirstRenderUser = useRef(true);
+    const isFirstRenderEmployee = useRef(true);
 
     useLayoutEffect(() => {
         document.body.style.backgroundColor = "lightblue"
@@ -27,6 +28,23 @@ const ManageEmployees = () => {
         }
         setUserName(user.firstName);
     }, [user])
+
+    useEffect(() => {
+        if (isFirstRenderEmployee.current === true) {
+            isFirstRenderEmployee.current = false;
+            return;
+        }
+        if(user.id === searchedEmployee.id) {
+            document.getElementById("updateButton").disabled = true;
+            document.getElementById("deleteButton").disabled = true;
+        } else if( searchedEmployee.accessLevel >= user.accessLevel || user.accessLevel !== 5) {
+            document.getElementById("updateButton").disabled = true;
+            document.getElementById("deleteButton").disabled = true;
+        } else {
+            document.getElementById("updateButton").disabled = false;
+            document.getElementById("deleteButton").disabled = false;
+        }
+    }, [searchedEmployee])
 
     const getUserFromToken = async () => {
         const response = await axios.get(`http://localhost:8080/employee/token`);
@@ -47,6 +65,8 @@ const ManageEmployees = () => {
         event.preventDefault();
         const response = await axios.get(`http://localhost:8080/employee/${document.getElementById("searchField").value}`);
         setSearchedEmployee(response.data);
+
+        
     }
 
     const updateButtonClicked = () => {
@@ -129,6 +149,10 @@ const ManageEmployees = () => {
         }
     }
 
+    const createEmployeeClicked = () => {
+        navigate("/create-employee");
+    }
+
     return (
         <div>
             <nav className="flex-row navbar navbar-expand-sm bg-body-tertiary">
@@ -142,10 +166,10 @@ const ManageEmployees = () => {
                     <div className="collapse navbar-collapse" id="navbarSupportedContent">
                         <ul className="navbar-nav ms-auto mb-1 mb-lg-0">
                             <li className="nav-item">
-                                <Link className="nav-link active" to="/manage-inventory">Manage Inventory</Link>
+                                <Link className="nav-link" to="/manage-inventory">Manage Inventory</Link>
                             </li>
                             <li className="nav-item">
-                                <Link className="nav-link" to="/manage-employees">Manage Employees</Link>
+                                <Link className="nav-link active" to="/manage-employees">Manage Employees</Link>
                             </li>
                             <li className="nav-item d-sm-none">
                                 <Link className="nav-link pb-0" to="/employee-profile">Profile</Link>
@@ -174,9 +198,10 @@ const ManageEmployees = () => {
             </nav>
 
             <div className="row m-3">
-                <form class="row justify-content-center" role="search" onSubmit={searchEmployee}>
-                    <input class="me-2 col-3" id="searchField" type="search" placeholder="Search" aria-label="Search" />
-                    <button class="btn btn-outline-success col-3" type="submit">Search</button>
+                <form class="d-flex justify-content-center w-100" role="search" onSubmit={searchEmployee}>
+                    <input class="me-2 col-md-3 col-4" id="searchField" type="search" placeholder="Search" aria-label="Search" />
+                    <button class="btn btn-outline-success col-md-3 me-2 col-4" type="submit">Search</button>
+                    <button className="btn btn-primary col-md-3 col-4" onClick={createEmployeeClicked}>Create</button>
                 </form>
 
                 {searchedEmployee === "" &&
@@ -186,11 +211,11 @@ const ManageEmployees = () => {
                     <div>
                         <div className="border border-white rounded mt-3 p-3">
                             <div className="row">
-                                <p className="col-3 m-0">Employee ID:</p>
-                                <p className="col-3 m-0">{searchedEmployee.id}</p>
-
-                                <p className="col-3 m-0">Access Level:</p>
-                                <p className="col-3 m-0">{searchedEmployee.accessLevel}</p>
+                                <p className="col-6 col-md-3 m-0">Employee ID:</p>
+                                <p className="col-6 col-md-3 m-0">{searchedEmployee.id}</p>
+                                <hr className="d-md-none mt-3" />
+                                <p className="col-6 col-md-3 m-0">Access Level:</p>
+                                <p className="col-6 col-md-3 m-0">{searchedEmployee.accessLevel}</p>
                             </div>
                             <hr />
                             <div className="row">
@@ -199,11 +224,11 @@ const ManageEmployees = () => {
                             </div>
                             <hr />
                             <div className="row">
-                                <p className="col-3 m-0">Job Title:</p>
-                                <p className="col-3 m-0">{searchedEmployee.jobTitle}</p>
-
-                                <p className="col-3 m-0">NIC:</p>
-                                <p className="col-3 m-0">{searchedEmployee.nic}</p>
+                                <p className="col-6 col-md-3 m-0">Job Title:</p>
+                                <p className="col-6 col-md-3 m-0">{searchedEmployee.jobTitle}</p>
+                                <hr className="d-md-none mt-3" />
+                                <p className="col-6 col-md-3 m-0">NIC:</p>
+                                <p className="col-6 col-md-3 m-0">{searchedEmployee.nic}</p>
                             </div>
                             <hr />
                             <div className="row">
@@ -217,16 +242,16 @@ const ManageEmployees = () => {
                             </div>
                             <hr />
                             <div className="row">
-                                <p className="col-3 m-0">Phone 1:</p>
-                                <p className="col-3 m-0">{searchedEmployee.phone[0]}</p>
-
-                                <p className="col-3 m-0">Phone 2:</p>
-                                <p className="col-3 m-0">{searchedEmployee.phone[1]}</p>
+                                <p className="col-6 col-md-3 m-0">Phone 1:</p>
+                                <p className="col-6 col-md-3 m-0">{searchedEmployee.phone[0]}</p>
+                                <hr className="d-md-none mt-3" />
+                                <p className="col-6 col-md-3 m-0">Phone 2:</p>
+                                <p className="col-6 col-md-3 m-0">{searchedEmployee.phone[1]}</p>
                             </div>
                         </div>
                         <div className="row justify-content-end">
-                            <button className="col-3 btn btn-success m-3" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasForm" aria-controls="offcanvasForm" onClick={updateButtonClicked}>Update</button>
-                            <button className="col-3 btn btn-danger m-3" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasForm" aria-controls="offcanvasForm" onClick={deleteButtonClicked}>Delete</button>
+                            <button className="col-3 btn btn-success m-3" id="updateButton" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasForm" aria-controls="offcanvasForm" onClick={updateButtonClicked}>Update</button>
+                            <button className="col-3 btn btn-danger m-3" id="deleteButton" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasForm" aria-controls="offcanvasForm" onClick={deleteButtonClicked}>Delete</button>
                         </div>
                         <div class="offcanvas offcanvas-end" data-bs-backdrop="static" tabIndex="-1" id="offcanvasForm" aria-labelledby="staticBackdropLabel">
                             <div id="form">
