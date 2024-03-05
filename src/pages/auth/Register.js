@@ -36,7 +36,6 @@ const Register = () => {
 
     const handleTitle = (event) => {
         setTitle(event.target.value);
-        console.log(event.target.value);
     }
 
     const handleFirstName = (event) => {
@@ -73,7 +72,7 @@ const Register = () => {
 
     const handleSubmit = async (event) => {
         event.preventDefault();
-
+        
         if (verifyInputs()) {
             const generateId = await axios.get("http://localhost:8080/auth/customer/generateId");
 
@@ -91,12 +90,10 @@ const Register = () => {
                 "password": password
             }
 
-            const response = await axios.post("http://localhost:8080/auth/signup", data)
+            const response = await axios.post("http://localhost:8080/auth/register", data)
                 .catch((error) => {
-                    console.log(error);
+                    setErrorMsg(error.response.data);
                 });
-
-                console.log(response.data);
 
             if (!!response && response.status === 200) {
                 localStorage.setItem("token", response.data);
@@ -111,9 +108,9 @@ const Register = () => {
     }
 
 
-    let pwd_regex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*[^\w\d\s])(?!.*[\s]).{8,}$/gm;
-    let tel_regex = /^(\+[0-9]{1,3}|0)[0-9]{2}( ){0,1}[0-9]{7,7}\b/gm;
-    let email_regex = /^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$/g;
+    let pwd_regex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*[^\w\d\s])(?!.*[\s]).{8,}$/m;
+    let tel_regex = /^(\+[0-9]{1,3}|0)[0-9]{2}( ){0,1}[0-9]{7,7}\b/m;
+    let email_regex = /[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?/;
 
     const verifyInputs = () => {
         if (!email_regex.test(email)) {
@@ -126,9 +123,11 @@ const Register = () => {
             setErrorMsg("Password confimation failed");
             return (false);
         } else if (phone1 != "" && !tel_regex.test(phone1)) {
+            console.log(phone1);
             setErrorMsg("Please check the phone 1 number entered");
             return (false);
         } else if (phone2 != "" && !tel_regex.test(phone2)) {
+            console.log(phone2);
             setErrorMsg("Please check the phone 2 number entered");
             return (false);
         } else {
@@ -217,7 +216,7 @@ const Register = () => {
                             <label className="ms-2 form-label">Phone 2</label>
                         </div>
                     </div>
-                    <p>{errorMsg}</p>
+                    <p className="text-danger">{errorMsg}</p>
                     <div className="row justify-content-end">
                         <button type="submit" className="btn btn-primary col-3 col-sm-2 me-2">Register</button>
                     </div>

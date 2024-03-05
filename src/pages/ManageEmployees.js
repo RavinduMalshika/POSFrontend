@@ -1,5 +1,5 @@
 import { Link, useNavigate } from "react-router-dom";
-import logo from "../logo.svg";
+import logo from "../resources/logo.png";
 import avatar from "../resources/avatar.png"
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import axios from "axios";

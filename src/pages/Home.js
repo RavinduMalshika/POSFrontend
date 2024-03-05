@@ -1,5 +1,5 @@
 import { Link, useNavigate } from 'react-router-dom';
-import logo from '../logo.svg';
+import logo from '../resources/logo.png';
 import avatar from '../resources/avatar.png';
 import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import axios from 'axios';
@@ -123,7 +123,6 @@ const Home = () => {
 
     const getUserFromToken = async () => {
         const response = await axios.get(`http://localhost:8080/customer/token`).catch((error) => {
-            console.log(error);
             localStorage.removeItem("token");
             return;
         });
@@ -172,7 +171,6 @@ const Home = () => {
     const categorySelected = async (filter) => {
         if (filter === "All Categories") {
             const response = await axios.get(`http://localhost:8080/auth/item`);
-            console.log(response.data.length);
             setItems(response.data);
 
             let pages = parseInt(response.data.length / itemsPerPage);
@@ -180,7 +178,6 @@ const Home = () => {
                 pages += 1;
             }
             setTotalPages(pages);
-            console.log(pages);
         }
         else {
             let category = null;
@@ -197,7 +194,6 @@ const Home = () => {
                 pages += 1;
             }
             setTotalPages(pages);
-            console.log(pages);
         }
         setPage(0);
     }
@@ -205,18 +201,11 @@ const Home = () => {
     const loadItems = async () => {
         let html = "";
 
-        console.log("total :" + totalPages);
-        console.log("page: " + page);
-        console.log(page === (totalPages - 1));
-
         if (items.length === 0) {
-            console.log("no items in the category");
             html += `<p class="text-center mt-2">No items available in the selected category</p>`
         } else if (page === (totalPages - 1)) {
-            console.log("items less than capacity");
             for (let i = page * itemsPerPage; i < items.length; i++) {
                 if (items[i] !== null) {
-                    console.log(items[i]);
                     const response = await axios.get(`http://localhost:8080/auth/stock/item/${items[i].id}`);
                     let stock = 0;
                     for (let j = 0; j < response.data.length; j++) {
@@ -254,10 +243,8 @@ const Home = () => {
                 }
             }
         } else {
-            console.log("items more than capacity");
             for (let i = page * itemsPerPage; i < (page * itemsPerPage + itemsPerPage); i++) {
                 if (items[i] !== null) {
-                    console.log(items[i]);
                     const response = await axios.get(`http://localhost:8080/auth/stock/item/${items[i].id}`);
                     let stock = 0;
                     for (let j = 0; j < response.data.length; j++) {
@@ -312,7 +299,6 @@ const Home = () => {
             document.getElementsByClassName("add-to-cart")[i].addEventListener("click", function () {
                 if (user !== null) {
                     let newCart = cart;
-                    console.log(cart);
                     newCart.push([document.getElementsByClassName("add-to-cart")[i].value, document.getElementsByClassName("add-to-cart")[i].innerHTML.substring(4)]);
                     setCart(newCart);
                     updateCart(newCart);
@@ -378,7 +364,6 @@ const Home = () => {
     }
 
     const updateCart = async () => {
-        console.log("updateCart called");
         let html = "";
         let total = 0;
         if (cart !== null) {
@@ -441,7 +426,6 @@ const Home = () => {
             "date": new Date(),
             "customerId": user.id
         }
-        console.log(data);
 
         const response = await axios.post(`http://localhost:8080/order`, data);
         if (response && response.status === 201) {
@@ -461,8 +445,8 @@ const Home = () => {
                 if (response && response.status === 201) {
                     console.log("order detail created");
                     setCart([]);
-                    //document.getElementById("toastBody").classList.innerHTML = `<span>Order (${orderId.data}) placed.</span>`;
-                    //document.getElementById("liveToast").classList.add("show");
+                    document.getElementById("toastBody").classList.innerHTML = `<span>Order (${orderId.data}) placed.</span>`;
+                    document.getElementById("liveToast").classList.add("show");
                 } else {
                     console.log("order detail creation failed");
                 }
@@ -478,7 +462,6 @@ const Home = () => {
             html += `<li class="list-group-item list-group-item-action list-group-item-success ps-3">${category.name}</li>`;
         });
 
-        console.log(document.getElementById("offcanvasCategoryListBody"));
         document.getElementById("offcanvasCategoryListBody").innerHTML = html;
 
         let categories = document.getElementById("offcanvasCategoryListBody").childNodes;
@@ -507,6 +490,15 @@ const Home = () => {
                             <span className="navbar-toggler-icon"></span>
                         </button>
                     </div>
+                    {user !== null &&
+                        <ul className="navbar-nav ms-auto mb-2 mb-lg-0">
+                            <li className="nav-item">
+                                <button className="nav-link py-0 d-sm-none d-block" id="cartIcon" type="button" data-bs-toggle="offcanvas" data-bs-target="#cart" aria-controls="cart">
+                                    <i class="bi bi-cart fs-4 text-success"></i>
+                                </button>
+                            </li>
+                        </ul>
+                    }
                     <div className="collapse navbar-collapse" id="navbarSupportedContent">
                         <ul className="navbar-nav ms-auto mb-2 mb-lg-0">
                             <li className="nav-item">
@@ -546,7 +538,7 @@ const Home = () => {
                             }
                             {user !== null &&
                                 <li className="nav-item">
-                                    <button className="nav-link py-0" id="cartIcon" type="button" data-bs-toggle="offcanvas" data-bs-target="#cart" aria-controls="cart">
+                                    <button className="nav-link py-0 d-none d-sm-block" id="cartIcon" type="button" data-bs-toggle="offcanvas" data-bs-target="#cart" aria-controls="cart">
                                         <i class="bi bi-cart fs-4 text-success"></i>
                                     </button>
                                 </li>
@@ -612,17 +604,17 @@ const Home = () => {
                 </div>
             </div>
 
-            {/* <div className="toast-container position-fixed bottom-0 end-0 p-3">
+            <div className="toast-container position-fixed bottom-0 end-0 p-3">
                 <div id="liveToast" className="toast" role="alert" aria-live="assertive" aria-atomic="true">
                     <div className="toast-header">
-                        <img src={logo} className="rounded me-2" alt="Super Store" height={25}/>
-                            <strong className="me-auto">Bootstrap</strong>
-                            <button type="button" className="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+                        <img src={logo} className="rounded me-2" alt="Super Store" height={25} />
+                        <strong className="me-auto">Bootstrap</strong>
+                        <button type="button" className="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
                     </div>
                     <div className="toast-body" id="toastBody">
                     </div>
                 </div>
-            </div> */}
+            </div>
         </div>
     )
 }

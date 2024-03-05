@@ -1,4 +1,4 @@
-import logo from '../logo.svg';
+import logo from '../resources/logo.png';
 import avatar from '../resources/avatar.png';
 import axios from "axios";
 import { useEffect, useRef, useState } from "react";
@@ -58,7 +58,6 @@ const AboutUs = () => {
     }
 
     const updateCart = async () => {
-        console.log("updateCart called");
         let html = "";
         let total = 0;
         if (cart !== null) {
@@ -124,7 +123,6 @@ const AboutUs = () => {
             "date": new Date(),
             "customerId": user.id
         }
-        console.log(data);
 
         const response = await axios.post(`http://localhost:8080/order`, data);
         if (response && response.status === 201) {
@@ -172,6 +170,15 @@ const AboutUs = () => {
                             <span className="navbar-toggler-icon"></span>
                         </button>
                     </div>
+                    {user !== null &&
+                        <ul className="navbar-nav ms-auto mb-2 mb-lg-0">
+                            <li className="nav-item">
+                                <button className="nav-link py-0 d-sm-none d-block" id="cartIcon" type="button" data-bs-toggle="offcanvas" data-bs-target="#cart" aria-controls="cart">
+                                    <i class="bi bi-cart fs-4 text-success"></i>
+                                </button>
+                            </li>
+                        </ul>
+                    }
                     <div className="collapse navbar-collapse" id="navbarSupportedContent">
                         <ul className="navbar-nav ms-auto mb-2 mb-lg-0">
                             <li className="nav-item">
@@ -211,7 +218,7 @@ const AboutUs = () => {
                             }
                             {user !== null &&
                                 <li className="nav-item">
-                                    <button className="nav-link py-0" id="cartIcon" type="button" data-bs-toggle="offcanvas" data-bs-target="#cart" aria-controls="cart">
+                                    <button className="nav-link py-0 d-none d-sm-block" id="cartIcon" type="button" data-bs-toggle="offcanvas" data-bs-target="#cart" aria-controls="cart">
                                         <i class="bi bi-cart fs-4 text-success"></i>
                                     </button>
                                 </li>

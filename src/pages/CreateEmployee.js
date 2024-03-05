@@ -1,5 +1,5 @@
 import axios from "axios";
-import logo from "../logo.svg";
+import logo from "../resources/logo.png";
 import avatar from "../resources/avatar.png"
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
@@ -76,7 +76,6 @@ const CreateEmployee = () => {
 
     const handleTitle = (event) => {
         setTitle(event.target.value);
-        console.log(event.target.value);
     }
 
     const handleFirstName = (event) => {
@@ -139,19 +138,17 @@ const CreateEmployee = () => {
                     console.log(error);
                 });
 
-            console.log(response.data);
-
             if (!!response && response.status === 201) {
                 console.log(`Employee ${generateId.data} created`);
-                //document.getElementById("liveToast").classList.add("show");
+                document.getElementById("liveToast").classList.add("show");
             } else {
                 console.log("Invalid");
             }
         }
     }
 
-    let tel_regex = /^(\+[0-9]{1,3}|0)[0-9]{2}( ){0,1}[0-9]{7,7}\b/gm;
-    let email_regex = /^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$/g;
+    let tel_regex = /^(\+[0-9]{1,3}|0)[0-9]{2}( ){0,1}[0-9]{7,7}\b/m;
+    let email_regex = /[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?/;
 
     const verifyInputs = () => {
         if (!email_regex.test(email)) {
@@ -300,7 +297,7 @@ const CreateEmployee = () => {
                 </div>
             </div>
 
-            {/* <div className="toast-container position-fixed bottom-0 end-0 p-3">
+            <div className="toast-container position-fixed bottom-0 end-0 p-3">
                 <div id="liveToast" className="toast" role="alert" aria-live="assertive" aria-atomic="true">
                     <div className="toast-header">
                         <img src={logo} className="rounded me-2" alt="Super Store" height={25}/>
@@ -313,7 +310,7 @@ const CreateEmployee = () => {
                         }
                     </div>
                 </div>
-            </div> */}
+            </div>
         </div>
     )
 }

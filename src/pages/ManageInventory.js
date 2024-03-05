@@ -1,5 +1,5 @@
 import axios from "axios";
-import logo from "../logo.svg";
+import logo from "../resources/logo.png";
 import avatar from "../resources/avatar.png"
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
@@ -111,7 +111,6 @@ const ManageInventory = () => {
         let html = "";
         for (let i = 0; i < items.length; i++) {
             const response = await axios.get(`http://localhost:8080/category/${items[i].category}`);
-            console.log(items[i]);
             html +=
                 `<tr>` +
                 `<td>${items[i].id}</td>` +
@@ -346,7 +345,6 @@ const ManageInventory = () => {
         switch (selection) {
             case ("category"):
                 row = document.getElementsByClassName("table-active");
-                console.log(row[0].childNodes);
                 document.getElementById("form").innerHTML =
                     `<div class="offcanvas-header">` +
                     `<h5 class="offcanvas-title" id="staticBackdropLabel">Update Category</h5>` +

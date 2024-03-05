@@ -1,8 +1,8 @@
-import logo from '../logo.svg';
+import logo from '../resources/logo.png';
 import avatar from '../resources/avatar.png';
 import editIcon from "../resources/edit.svg";
 import axios from "axios";
-import { useEffect, useLayoutEffect, useRef, useState } from "react";
+import { useEffect, useLayoutEffect, useReducer, useRef, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 
 const CustomerProfile = () => {
@@ -13,6 +13,7 @@ const CustomerProfile = () => {
     const [changePassword, setChangePassword] = useState(false);
     const [errorMessage, setErrorMessage] = useState("");
     const navigate = useNavigate();
+    const [ignored, forceUpdate] = useReducer(x => x + 1, 0);
 
     const isFirstRenderUser = useRef(true);
     const isFirstRenderCart = useRef(true);
@@ -96,7 +97,7 @@ const CustomerProfile = () => {
     }
 
     const updateCart = async () => {
-        console.log("updateCart called");
+        document.getElementById("offcanvasTitle").innerHTML = "Cart";
         let html = "";
         let total = 0;
         if (cart !== null) {
@@ -126,7 +127,7 @@ const CustomerProfile = () => {
                 `<button class="col-6 btn btn-success" id="buyButton">Buy</ button>` +
                 `</ div>`;
         }
-        document.getElementById("cartBody").innerHTML = html;
+        document.getElementById("offcanvasBody").innerHTML = html;
 
         const deleteButtons = document.getElementsByClassName("bi-trash");
         for (let i = 0; i < deleteButtons.length; i++) {
@@ -155,14 +156,11 @@ const CustomerProfile = () => {
     const purchaseOrder = async () => {
         const orderId = await axios.get(`http://localhost:8080/order/generateId`);
 
-
-
         const data = {
             "id": orderId.data,
             "date": new Date(),
             "customerId": user.id
         }
-        console.log(data);
 
         const response = await axios.post(`http://localhost:8080/order`, data);
         if (response && response.status === 201) {
@@ -187,8 +185,6 @@ const CustomerProfile = () => {
             console.log("order creation failed");
         }
 
-        console.log(data);
-
         cart.forEach(item => {
             const data = {
                 "orderId": response.data,
@@ -196,7 +192,6 @@ const CustomerProfile = () => {
                 "quantity": item[1],
                 "discount": 0
             }
-            console.log(data);
         })
     }
 
@@ -252,7 +247,14 @@ const CustomerProfile = () => {
         document.getElementById("city").disabled = true;
         document.getElementById("phone1").disabled = true;
         document.getElementById("phone2").disabled = true;
-        getUserFromToken();
+
+        document.getElementById("firstName").value = user.firstName;
+        document.getElementById("lastName").value = user.lastName;
+        document.getElementById("nic").value = user.nic;
+        document.getElementById("address").value = user.address;
+        document.getElementById("city").value = user.city;
+        document.getElementById("phone1").value = user.phone[0];
+        document.getElementById("phone2").value = user.phone[1];
     }
 
     const loadChangePasswordForm = () => {
@@ -299,6 +301,29 @@ const CustomerProfile = () => {
         setChangePassword(false);
     }
 
+    const deleteCustomerClicked = () => {
+        document.getElementById("offcanvasTitle").innerHTML = "Delete Account";
+        document.getElementById("offcanvasBody").innerHTML = 
+        `<b class="fs-3">Are you sure?</b>` +
+        `<p>Please note that all user data including order history will be permanently deleted.</p>` +
+        `<div class="row justify-content-end">` +
+        `<button class="btn btn-danger col-6 me-3" id="deleteButton">Delete</ button>` +
+        `</div>`;
+
+        document.getElementById("deleteButton").onclick = deleteCustomer;
+    }
+
+    const deleteCustomer = async () => {
+        const response = await axios.delete(`http://localhost:8080/customer/${user.id}`);
+        if (response && response.status === 200) {
+            console.log(response.data);
+            localStorage.removeItem("token");
+            navigate("/");
+        } else {
+            console.log(response.data);
+        }
+    }
+
     return (
         <div>
             <nav className="flex-row navbar navbar-expand-sm bg-body-tertiary w100" id="topNavBar">
@@ -309,6 +334,15 @@ const CustomerProfile = () => {
                             <span className="navbar-toggler-icon"></span>
                         </button>
                     </div>
+                    {user !== null &&
+                        <ul className="navbar-nav ms-auto mb-2 mb-lg-0">
+                            <li className="nav-item">
+                                <button className="nav-link py-0 d-sm-none d-block" id="cartIcon" type="button" data-bs-toggle="offcanvas" data-bs-target="#cart" aria-controls="cart">
+                                    <i class="bi bi-cart fs-4 text-success"></i>
+                                </button>
+                            </li>
+                        </ul>
+                    }
                     <div className="collapse navbar-collapse" id="navbarSupportedContent">
                         <ul className="navbar-nav ms-auto mb-2 mb-lg-0">
                             <li className="nav-item">
@@ -318,7 +352,7 @@ const CustomerProfile = () => {
                                 <Link className="nav-link" to="/about-us">About Us</Link>
                             </li>
                             <li className="nav-item">
-                                <Link className="nav-link active" to="/contact-us">Contact Us</Link>
+                                <Link className="nav-link" to="/contact-us">Contact Us</Link>
                             </li>
                             {user === null &&
                                 <li className="nav-item">
@@ -348,7 +382,7 @@ const CustomerProfile = () => {
                             }
                             {user !== null &&
                                 <li className="nav-item">
-                                    <button className="nav-link py-0" id="cartIcon" type="button" data-bs-toggle="offcanvas" data-bs-target="#cart" aria-controls="cart">
+                                    <button className="nav-link py-0 d-none d-sm-block" id="cartIcon" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvas" aria-controls="offcanvas" onClick={updateCart}>
                                         <i class="bi bi-cart fs-4 text-success"></i>
                                     </button>
                                 </li>
@@ -465,7 +499,7 @@ const CustomerProfile = () => {
                     <h1 className="mb-3">Change Password</h1>
                     <div className="row justify-content-center">
                         {changePassword === false &&
-                            <button className="btn btn-warning col-6" onClick={loadChangePasswordForm}>Change Password</button>
+                            <button className="btn btn-warning col-md-6 col-10" onClick={loadChangePasswordForm}>Change Password</button>
                         }
                         {changePassword === true &&
                             <div>
@@ -494,12 +528,21 @@ const CustomerProfile = () => {
                 </div>
             </div>
 
-            <div class="offcanvas offcanvas-end" tabindex="-1" id="cart" aria-labelledby="cart">
+            <div className="row justify-content-center m-auto">
+                <div className="border border-white rounded m-3 p-3 col-lg-8 col-md-10 col-11">
+                    <h1 className="mb-3">Delete Account</h1>
+                    <div className="row justify-content-center">
+                        <button className="btn btn-danger col-md-6 col-10" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvas" aria-controls="offcanvas" onClick={deleteCustomerClicked}>Delete</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="offcanvas offcanvas-end" tabindex="-1" id="offcanvas" aria-labelledby="offcanvas">
                 <div class="offcanvas-header">
-                    <h5 class="offcanvas-title">Cart</h5>
+                    <h5 class="offcanvas-title" id="offcanvasTitle"></h5>
                     <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
                 </div>
-                <div class="offcanvas-body pt-0" id="cartBody">
+                <div class="offcanvas-body pt-0" id="offcanvasBody">
                 </div>
             </div>
         </div>

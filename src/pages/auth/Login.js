@@ -1,5 +1,5 @@
 import { Link, resolvePath, useNavigate } from 'react-router-dom';
-import logo from '../../logo.svg';
+import logo from '../../resources/logo.png';
 import axios from 'axios';
 import { useEffect, useLayoutEffect } from 'react';
 
@@ -35,12 +35,9 @@ const Login = () => {
             "password": password
         }
 
-        console.log(data);
-
         const response = await axios
             .post("http://localhost:8080/auth/login", data)
             .catch(error => { console.log(error) });
-        console.log(response);
 
         if (response && response.status === 200) {
             localStorage.setItem("token", response.data);

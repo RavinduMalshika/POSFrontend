@@ -1,5 +1,5 @@
 import axios from "axios";
-import logo from "../logo.svg";
+import logo from "../resources/logo.png";
 import avatar from "../resources/avatar.png";
 import editIcon from "../resources/edit.svg";
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
